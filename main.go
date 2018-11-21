@@ -23,7 +23,7 @@ func main() {
 
 	// Run vim on each of the errors.
 	// TODO(ijt): Show each error at a convenient time.
-	rx := regexp.MustCompile(`([\w/~]+\.go):(\d+)`)
+	rx := regexp.MustCompile(`([\w./~]+\.go):(\d+)`)
 	s := bufio.NewScanner(bytes.NewReader(buf.Bytes()))
 	for s.Scan() {
 		line := s.Text()
