@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	// Run go test
+	// Run go test.
 	args := []string{"go", "test"}
 	args = append(args, os.Args[1:]...)
 	gotest := exec.Command(args[0], args[1:]...)
@@ -21,6 +21,8 @@ func main() {
 	gotest.Stderr = mw
 	_ = gotest.Run()
 
+	// Run vim on each of the errors.
+	// TODO(ijt): Show each error at a convenient time.
 	rx := regexp.MustCompile(`([\w/~]+\.go):(\d+)`)
 	s := bufio.NewScanner(bytes.NewReader(buf.Bytes()))
 	for s.Scan() {
