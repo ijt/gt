@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"regexp"
@@ -11,12 +12,17 @@ import (
 
 func main() {
 	// Run go test
-	gotest := exec.Command("go", "test")
-	out, _ := gotest.CombinedOutput()
-	fmt.Printf("%s\n", out)
+	args := []string{"go", "test"}
+	args = append(args, os.Args[1:]...)
+	gotest := exec.Command(args[0], args[1:]...)
+	var buf bytes.Buffer
+	mw := io.MultiWriter(os.Stdout, &buf)
+	gotest.Stdout = mw
+	gotest.Stderr = mw
+	_ = gotest.Run()
 
-	rx := regexp.MustCompile(`(\w+\.go):(\d+)`)
-	s := bufio.NewScanner(bytes.NewReader(out))
+	rx := regexp.MustCompile(`([\w/~]+\.go):(\d+)`)
+	s := bufio.NewScanner(bytes.NewReader(buf.Bytes()))
 	for s.Scan() {
 		line := s.Text()
 		m := rx.FindStringSubmatch(line)
@@ -25,7 +31,7 @@ func main() {
 			cmd.Stdout = os.Stdout
 			cmd.Stdin = os.Stdin
 			if err := cmd.Run(); err != nil {
-				fmt.Printf("v: %v: %s\n", err, out)
+				fmt.Printf("v: %v\n", err)
 			}
 		}
 	}
